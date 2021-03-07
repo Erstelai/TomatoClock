@@ -14,7 +14,7 @@ class TomatoClock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: '認真助手',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -35,8 +35,8 @@ class HomeWidget extends StatefulWidget {
 class _HomeWidgetState extends State<HomeWidget> {
   var period = Duration(seconds: 1);
   bool _countDownIsStart = false;
-  int _countDownSecond = 60; // countDown var
-  int _selectedStudyTime = 60; // record user current studyTime
+  int _countDownSecond = 60*25; // countDown var
+  int _selectedStudyTime = 60*25; // record user current studyTime
   int _studyTime = 0; // display study time
   Timer _currentTimer;
   void startTimeCountDown() {
