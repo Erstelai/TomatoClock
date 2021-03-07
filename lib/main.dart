@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:tomato_clock/DateTool.dart';
+import 'package:tomato_clock/TimeSelectedWidget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(TomatoClock());
 }
 
-class MyApp extends StatelessWidget {
+class TomatoClock extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -17,51 +19,71 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: '認真助手'),
+      home: HomeWidget(title: '認真助手'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class HomeWidget extends StatefulWidget {
+  HomeWidget({Key key, this.title}) : super(key: key);
 
   final String title;
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomeWidgetState createState() => _HomeWidgetState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomeWidgetState extends State<HomeWidget> {
   var period = Duration(seconds: 1);
-  bool countDownIsStart = false;
-  int countDownSecond = 60*25;
+  bool _countDownIsStart = false;
+  int _countDownSecond = 60; // countDown var
+  int _selectedStudyTime = 60; // record user current studyTime
+  int _studyTime = 0; // display study time
   Timer _currentTimer;
   void startTimeCountDown() {
     if (_currentTimer != null) {
       return;
     }
     _currentTimer = Timer.periodic(period, (timer) {
-      countDownIsStart = true;
-      if (countDownSecond < 1) {
-        timer.cancel();
-        timer = null;
+      _countDownIsStart = true;
+      if (_countDownSecond < 1) {
+        _didFinishCountDown();
       } else {
-        countDownSecond--;
+        _countDownSecond--;
       }
-      setState(() {});
+      setState(() {}); // 更新倒數畫面
     });
   }
+  // MARK: Private Func
+  void _didFinishCountDown() {
+    _currentTimer.cancel();
+    _currentTimer = null;
+    saveFinishedStudyTime();
+    _countDownIsStart = false;
+    _countDownSecond = _selectedStudyTime; // reset count down sec
+  }
+  void saveFinishedStudyTime() async {
+    setState(() {
+      _studyTime = _studyTime + _selectedStudyTime;
+    });
+    // use daily string to get daily data
+    // ex: 2021/3/4 => key
+    String todayDateStr = DateTool.getTodayFormatDateString();
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await _prefs;
+    int currentStudyTime = prefs.getInt(todayDateStr);
+    await prefs.setInt(todayDateStr, _studyTime);
 
+  }
 
   void stopTimeCountDown() {
-    countDownIsStart = false;
+    _countDownIsStart = false;
     _currentTimer.cancel();
     _currentTimer = null;
     setState(() {});
   }
-
-
   @override
   Widget build(BuildContext context) {
+    getTodayStudyTime();
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -75,12 +97,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 padding: EdgeInsets.all(16),
                 child: GestureDetector(
                   child:  Text(
-                    DateTool.getTimeString(countDownSecond),
+                    DateTool.getTimeString(_countDownSecond),
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 64),
                   ),
                   onTap: () {
-                    print('click title');
-                  },
+                    pushToSelectedTimeWidget(context);
+                  }
                 )
               )),
               Container(
@@ -91,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       height: 200,
                       child: RaisedButton(
                         onPressed: () {
-                          if (countDownIsStart == false) {
+                          if (_countDownIsStart == false) {
                             return;
                           }
                           stopTimeCountDown();
@@ -108,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 200,
                     child: RaisedButton(
                       onPressed: () {
-                        if (countDownIsStart == true) {
+                        if (_countDownIsStart == true) {
                           return;
                         }
                         startTimeCountDown();
@@ -126,7 +148,26 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisSize: MainAxisSize.max,
                 ),
               ),
-              Text('今日已認真了80分鐘'),
+              Text('今日已認真了$_studyTime分鐘'),
             ])));
+  }
+  void pushToSelectedTimeWidget(BuildContext context) async {
+    final selectedFuture = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => TimeSelectedWidget()));
+      print(selectedFuture);
+        setState(() {
+          _countDownSecond = int.parse(selectedFuture);
+          _studyTime = _countDownSecond;
+          _selectedStudyTime = _countDownSecond;
+        });
+  }
+  Future getTodayStudyTime() async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await _prefs;
+    String todayDateStr = DateTool.getTodayFormatDateString();
+    setState(() {
+      _studyTime = prefs.getInt(todayDateStr) ?? 0;
+    });
   }
 }
