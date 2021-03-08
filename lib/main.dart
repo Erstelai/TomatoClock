@@ -33,11 +33,13 @@ class HomeWidget extends StatefulWidget {
 }
 
 class _HomeWidgetState extends State<HomeWidget> {
+  final String Last_Select_Time_Local_Key = 'lastSelectTime';
   var period = Duration(seconds: 1);
   bool _countDownIsStart = false;
   int _countDownSecond = 60*25; // countDown var
   int _selectedStudyTime = 60*25; // record user current studyTime
   int _studyTime = 0; // display study time
+  bool isGetLastStudyTime = false;
   Timer _currentTimer;
   void startTimeCountDown() {
     if (_currentTimer != null) {
@@ -81,9 +83,36 @@ class _HomeWidgetState extends State<HomeWidget> {
     _currentTimer = null;
     setState(() {});
   }
+
+  void _saveLastSelectedStudyTime(int lastSelectedTime) async {
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await _prefs;
+    prefs.setInt(Last_Select_Time_Local_Key, lastSelectedTime);
+    print('LarrySave $lastSelectedTime');
+  }
+
+  void _getLastSelectedStudyTime() async {
+    if (isGetLastStudyTime == true) {
+      return;
+    }
+    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+    final SharedPreferences prefs = await _prefs;
+      int lastTimeSelectedStudyTime = prefs.getInt(Last_Select_Time_Local_Key) ?? 0;
+      print('Larry $lastTimeSelectedStudyTime');
+      isGetLastStudyTime = true;
+      if (lastTimeSelectedStudyTime > 0) {
+        setState(() {
+          _countDownSecond = lastTimeSelectedStudyTime;
+          _selectedStudyTime = lastTimeSelectedStudyTime;
+        });
+      }
+  }
+
   @override
   Widget build(BuildContext context) {
     getTodayStudyTime();
+    _getLastSelectedStudyTime();
+    String todayTotalStudyTimeStr = DateTool.getMinutes(_studyTime);
     return Scaffold(
         appBar: AppBar(
           title: Text(widget.title),
@@ -148,18 +177,19 @@ class _HomeWidgetState extends State<HomeWidget> {
                   mainAxisSize: MainAxisSize.max,
                 ),
               ),
-              Text('今日已認真了$_studyTime分鐘'),
+              Text('今日已認真了$todayTotalStudyTimeStr分鐘'),
             ])));
   }
   void pushToSelectedTimeWidget(BuildContext context) async {
     final selectedFuture = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => TimeSelectedWidget()));
-      print(selectedFuture);
         setState(() {
           _countDownSecond = int.parse(selectedFuture);
           _studyTime = _countDownSecond;
           _selectedStudyTime = _countDownSecond;
+          // save user selected studyTime
+          _saveLastSelectedStudyTime(int.parse(selectedFuture));
         });
   }
   Future getTodayStudyTime() async {

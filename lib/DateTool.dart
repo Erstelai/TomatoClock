@@ -11,4 +11,10 @@ class DateTool {
     String dateString = format.format(todayDate);
     return dateString;
   }
+
+  static String getMinutes(int sec) {
+    int min = (sec / 60).truncate();
+    String minStr = (min % 60).toString();
+    return minStr;
+  }
 }
