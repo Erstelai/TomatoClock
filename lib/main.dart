@@ -88,7 +88,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     final SharedPreferences prefs = await _prefs;
     prefs.setInt(Last_Select_Time_Local_Key, lastSelectedTime);
-    print('LarrySave $lastSelectedTime');
   }
 
   void _getLastSelectedStudyTime() async {
@@ -98,7 +97,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
     final SharedPreferences prefs = await _prefs;
       int lastTimeSelectedStudyTime = prefs.getInt(Last_Select_Time_Local_Key) ?? 0;
-      print('Larry $lastTimeSelectedStudyTime');
       isGetLastStudyTime = true;
       if (lastTimeSelectedStudyTime > 0) {
         setState(() {
