@@ -14,7 +14,7 @@ class DateTool {
 
   static String getMinutes(int sec) {
     int min = (sec / 60).truncate();
-    String minStr = (min % 60).toString();
+    String minStr = min.toString();
     return minStr;
   }
 }
