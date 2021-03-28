@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tomato_clock/DateTool.dart';
 import 'package:tomato_clock/TimeSelectedWidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tomato_clock/Widget/CountDownWidget.dart';
 
 void main() {
   runApp(TomatoClock());
@@ -41,6 +42,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   int _studyTime = 0; // display study time
   bool isGetLastStudyTime = false;
   Timer _currentTimer;
+  // MARK: Custom Widget
+  CountDownWidget countDownWidget;
   void startTimeCountDown() {
     if (_currentTimer != null) {
       return;
@@ -105,7 +108,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
       }
   }
-
+  // MARK: override function
+  @override
+  void initState() {
+    super.initState();
+    countDownWidget = CountDownWidget();
+  }
   @override
   Widget build(BuildContext context) {
     getTodayStudyTime();
@@ -119,19 +127,20 @@ class _HomeWidgetState extends State<HomeWidget> {
             padding: EdgeInsets.all(16),
             alignment: Alignment.topCenter,
             child: Column(children: <Widget>[
-              Card(
-                  child: Container(
-                padding: EdgeInsets.all(16),
-                child: GestureDetector(
-                  child:  Text(
-                    DateTool.getTimeString(_countDownSecond),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 64),
-                  ),
-                  onTap: () {
-                    pushToSelectedTimeWidget(context);
-                  }
-                )
-              )),
+                 countDownWidget,
+              // Card(
+              //     child: Container(
+              //   padding: EdgeInsets.all(16),
+              //   child: GestureDetector(
+              //     child:  Text(
+              //       DateTool.getTimeString(_countDownSecond),
+              //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 64),
+              //     ),
+              //     onTap: () {
+              //       pushToSelectedTimeWidget(context);
+              //     }
+              //   )
+              // )),
               Container(
                 padding: EdgeInsets.all(16),
                 height: 200,
@@ -140,10 +149,12 @@ class _HomeWidgetState extends State<HomeWidget> {
                       height: 200,
                       child: RaisedButton(
                         onPressed: () {
-                          if (_countDownIsStart == false) {
-                            return;
-                          }
-                          stopTimeCountDown();
+                          // if (_countDownIsStart == false) {
+                          //   return;
+                          // }
+                          // call CountdownWidget pause
+                          countDownWidget.pauseTimerCount();
+                          // stopTimeCountDown();
                         },
                         child: Text('Stop'),
                         color: Colors.lightBlue,
@@ -160,7 +171,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                         if (_countDownIsStart == true) {
                           return;
                         }
-                        startTimeCountDown();
+                        // call CountdownWidget start
+                        countDownWidget.startTimerCount();
+                        // startTimeCountDown();
                       },
                       child: Text('Start'),
                       color: Colors.lightBlue,
