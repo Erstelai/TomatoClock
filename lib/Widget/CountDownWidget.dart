@@ -3,15 +3,27 @@ import 'package:flutter/material.dart';
 import 'package:tomato_clock/DateTool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 class CountDownWidget extends StatefulWidget {
+  // MARK: Private property
   _CountDownState currentState;
+  int countDownSec;
+
+  // TODO: Notify outside when countdown finished
+  // MARK: Init Function
+  CountDownWidget(this.countDownSec);
+
   @override
   _CountDownState createState() {
     currentState = _CountDownState();
+    currentState._countDownSecond = countDownSec;
+    currentState._selectedStudyTime = countDownSec;
     return currentState;
   }
 
-  void startTimerCount() {
-    currentState.startTimeCountDown();
+  void updateCountDownSec(int countDownSec) {
+    currentState._countDownSecond = countDownSec;
+  }
+  void startTimerCount({Function() callback}) {
+    currentState.startTimeCountDown(callback: callback);
   }
   void pauseTimerCount() {
     currentState.pauseTimeCountDown();
@@ -23,19 +35,19 @@ class _CountDownState extends State<CountDownWidget> {
   Timer _currentTimer;
   var _period = Duration(seconds: 1);
   bool _isCountDownStart = false;
-  int _countDownSecond = 60*25;
-  int _selectedStudyTime = 60*25;
-  int _lastSelectedTme; // loda data
-  final String Last_Select_Time_Local_Key = 'lastSelectTime';
+  int _countDownSecond;
+  int _selectedStudyTime;
+  int _lastSelectedTme; // load data
 
   // MARK: Public Functions
-  void startTimeCountDown() {
+  void startTimeCountDown({Function() callback}) {
     if (_currentTimer != null) {
       return;
     }
     _currentTimer = Timer.periodic(_period, (timer) {
       _isCountDownStart = true;
       if (_countDownSecond < 1) {
+        callback();
         _didFinishCountDown();
       } else {
         _countDownSecond--;
@@ -66,25 +78,6 @@ class _CountDownState extends State<CountDownWidget> {
     final SharedPreferences prefs = await _prefs;
     int currentStudyTime = prefs.getInt(todayDateStr);
     await prefs.setInt(todayDateStr, _selectedStudyTime);
-  }
-
-  void _saveLastSelectedStudyTime() async {
-    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-    final SharedPreferences prefs = await _prefs;
-    prefs.setInt(Last_Select_Time_Local_Key, _lastSelectedTme);
-  }
-
-  void _getLastSelectedStudyTime() async {
-    // do it when init state
-    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-    final SharedPreferences prefs = await _prefs;
-    int lastTimeSelectedStudyTime = prefs.getInt(Last_Select_Time_Local_Key) ?? 0;
-    if (lastTimeSelectedStudyTime > 0) {
-      setState(() {
-        _countDownSecond = lastTimeSelectedStudyTime;
-        _selectedStudyTime = lastTimeSelectedStudyTime;
-      });
-    }
   }
 
 
