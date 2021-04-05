@@ -15,7 +15,6 @@ class CountDownWidget extends StatefulWidget {
   _CountDownState createState() {
     currentState = _CountDownState();
     currentState._countDownSecond = countDownSec;
-    currentState._selectedStudyTime = countDownSec;
     return currentState;
   }
 
@@ -36,12 +35,10 @@ class _CountDownState extends State<CountDownWidget> {
   var _period = Duration(seconds: 1);
   bool _isCountDownStart = false;
   int _countDownSecond;
-  int _selectedStudyTime;
-  int _lastSelectedTme; // load data
 
   // MARK: Public Functions
   void startTimeCountDown({Function() callback}) {
-    if (_currentTimer != null) {
+    if (_currentTimer != null || _isCountDownStart == true) {
       return;
     }
     _currentTimer = Timer.periodic(_period, (timer) {
@@ -56,6 +53,9 @@ class _CountDownState extends State<CountDownWidget> {
     });
   }
   void pauseTimeCountDown() {
+    if (_isCountDownStart == false ) {
+      return;
+    }
     _isCountDownStart = false;
     _currentTimer.cancel();
     _currentTimer = null;
@@ -67,19 +67,7 @@ class _CountDownState extends State<CountDownWidget> {
     _currentTimer.cancel();
     _currentTimer = null;
     _isCountDownStart = false;
-    _countDownSecond = _selectedStudyTime;
   }
-  void _saveFinishedStudyTime() async {
-    // callback to HomeWidget
-    // use daily string to get daily data
-    // ex: 2021/3/20 => key
-    String todayDateStr = DateTool.getTodayFormatDateString();
-    Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-    final SharedPreferences prefs = await _prefs;
-    int currentStudyTime = prefs.getInt(todayDateStr);
-    await prefs.setInt(todayDateStr, _selectedStudyTime);
-  }
-
 
   // MARK: Override Functions
   @override

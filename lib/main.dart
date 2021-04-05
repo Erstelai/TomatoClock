@@ -42,8 +42,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   int _studyTime = 0; // display study time
   bool isGetLastStudyTime = false;
   Timer _currentTimer;
+  CountDownWidget countDownWidget = CountDownWidget(120);
   // MARK: Custom Widget
-  CountDownWidget countDownWidget;
   void startTimeCountDown() {
     if (_currentTimer != null) {
       return;
@@ -112,7 +112,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     super.initState();
-    countDownWidget = CountDownWidget();
   }
   @override
   Widget build(BuildContext context) {
@@ -127,20 +126,20 @@ class _HomeWidgetState extends State<HomeWidget> {
             padding: EdgeInsets.all(16),
             alignment: Alignment.topCenter,
             child: Column(children: <Widget>[
-                 countDownWidget,
-              // Card(
-              //     child: Container(
-              //   padding: EdgeInsets.all(16),
-              //   child: GestureDetector(
-              //     child:  Text(
-              //       DateTool.getTimeString(_countDownSecond),
-              //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 64),
-              //     ),
-              //     onTap: () {
-              //       pushToSelectedTimeWidget(context);
-              //     }
-              //   )
-              // )),
+              countDownWidget,
+              Card(
+                  child: Container(
+                padding: EdgeInsets.all(16),
+                child: GestureDetector(
+                  child:  Text(
+                    DateTool.getTimeString(_countDownSecond),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 64),
+                  ),
+                  onTap: () {
+                    pushToSelectedTimeWidget(context);
+                  }
+                )
+              )),
               Container(
                 padding: EdgeInsets.all(16),
                 height: 200,
@@ -149,12 +148,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                       height: 200,
                       child: RaisedButton(
                         onPressed: () {
-                          // if (_countDownIsStart == false) {
-                          //   return;
-                          // }
-                          // call CountdownWidget pause
-                          countDownWidget.pauseTimerCount();
-                          // stopTimeCountDown();
+                          if (_countDownIsStart == false) {
+                            return;
+                          }
+                          stopTimeCountDown();
                         },
                         child: Text('Stop'),
                         color: Colors.lightBlue,
@@ -171,9 +168,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                         if (_countDownIsStart == true) {
                           return;
                         }
-                        // call CountdownWidget start
-                        countDownWidget.startTimerCount();
-                        // startTimeCountDown();
+                        countDownWidget.startTimerCount(callback: () {
+                          print('ok');
+                        });
+                        startTimeCountDown();
                       },
                       child: Text('Start'),
                       color: Colors.lightBlue,
