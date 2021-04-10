@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tomato_clock/DateTool.dart';
 import 'package:tomato_clock/TimeSelectedWidget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tomato_clock/Widget/CountDownWidget.dart';
 
 void main() {
   runApp(TomatoClock());
@@ -41,6 +42,8 @@ class _HomeWidgetState extends State<HomeWidget> {
   int _studyTime = 0; // display study time
   bool isGetLastStudyTime = false;
   Timer _currentTimer;
+  CountDownWidget countDownWidget = CountDownWidget(120);
+  // MARK: Custom Widget
   void startTimeCountDown() {
     if (_currentTimer != null) {
       return;
@@ -105,7 +108,11 @@ class _HomeWidgetState extends State<HomeWidget> {
         });
       }
   }
-
+  // MARK: override function
+  @override
+  void initState() {
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     getTodayStudyTime();
@@ -119,6 +126,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             padding: EdgeInsets.all(16),
             alignment: Alignment.topCenter,
             child: Column(children: <Widget>[
+              countDownWidget,
               Card(
                   child: Container(
                 padding: EdgeInsets.all(16),
@@ -160,6 +168,9 @@ class _HomeWidgetState extends State<HomeWidget> {
                         if (_countDownIsStart == true) {
                           return;
                         }
+                        countDownWidget.startTimerCount(callback: () {
+                          print('ok');
+                        });
                         startTimeCountDown();
                       },
                       child: Text('Start'),
